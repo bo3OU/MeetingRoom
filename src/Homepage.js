@@ -4,6 +4,9 @@ import './Assets/css/vegas.min.css';
 import './Assets/css/font-awesome.min.css';
 import './Assets/css/templatemo-style.css';
 import './Assets/css/custom.css';
+import queryString from 'query-string';
+import axios from 'axios';
+import qs from 'qs';
 
 // will get the authorization from google 
 function getOAuth() {
@@ -13,6 +16,29 @@ function getOAuth() {
 
 // will get the token using the authorization key
 function getToken(auth_key) {
+
+    const data = { 
+        'code': auth_key,
+        'client_id' : '648876707065-l8igoqtnrg46lhkmqsiq9f3ofuugiqj1.apps.googleusercontent.com',
+        'grant_type' : 'authorization_code',
+        'client_secret' : 'RYX_egjx0B0NtexbeTorq-IN',
+        'redirect_uri' : 'https://modest-ramanujan-7fb91d.netlify.com/homepage',
+        'withCredentials': 'true', 
+        'crossdomain' : 'true',
+    };
+    axios.post('https://accounts.google.com/o/oauth2/token', qs.stringify(data))  
+    .then(function (response) {
+        // handle success
+        console.log(response);
+      })
+      .catch(function (error) {
+        // handle error
+        console.log('something bad happened')   
+        console.log(error);
+      })
+      .then(function () {
+        // always executed
+      });
 
     // return new key and stores it in memory 
 } 
@@ -54,10 +80,13 @@ export default class  Homepage extends Component {
             TimerValue : '11 ; 55:22',
             RoomStatus : 0,  
         };
-      }
-      componentWillMount () {       
-          this.setState
-      }
+        const parsed = queryString.parse(this.props.location.search);
+        localStorage.setItem('code', parsed.code);
+        getToken(parsed.code)
+
+
+    }
+
     render() {
       return ( 
         <div>
@@ -76,7 +105,7 @@ export default class  Homepage extends Component {
                                             </img>
                                         </div>
                                         <div className="col-md-8">
-                                            <h1 style={{'font-size':'2.5em','margin-bottom': '0px'}}>{ this.state.RoomTitle }</h1>
+                                            <h1 style={{'fontSize':'2.5em','marginBottom': '0px'}}>{ this.state.RoomTitle }</h1>
                                         </div>
                                         <div className="col-md-1">
                                             <button type="button" className="btn btn-success btn-circle btn-xl">
@@ -92,21 +121,21 @@ export default class  Homepage extends Component {
         
                                     <div className="row">
                                         <div className="col-md-12">
-                                            <h3 style={{'text-align': 'center','margin-top': '0px'}}>{this.state.CurrentDate}</h3>
+                                            <h3 style={{'textAlign': 'center','marginTop': '0px'}}>{this.state.CurrentDate}</h3>
                                         </div>
                                     </div>
         
-                                    <div style={{ 'padding': '20px','margin-top': '100px' }}>
+                                    <div style={{ 'padding': '20px','marginTop': '100px' }}>
                                         <div className="row">
-                                            <div className="col-md-12"><h3 style={{'text-align':'center' }}>{this.state.TimerStatement}</h3></div>
+                                            <div className="col-md-12"><h3 style={{'textAlign':'center' }}>{this.state.TimerStatement}</h3></div>
                                         </div>
                                         <div className="row">
-                                            <div className="col-md-12"><h1 style={{'font-size':'8em' }}>{this.state.TimerValue}</h1></div>
+                                            <div className="col-md-12"><h1 style={{'fontSize':'8em' }}>{this.state.TimerValue}</h1></div>
                                         </div>
                                     </div>
         
         
-                                    <div className="row" style={{'margin-top': '100px'}}>
+                                    <div className="row" style={{'marginTop': '100px'}}>
                                         <div className="col-md-4">
                                             <button type="button" className="buttons successes">15 MINS</button>
                                         </div>
