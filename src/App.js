@@ -7,7 +7,22 @@ import Login from './Login';
 import Calendar from './Calendar';
 import Form from './Form';
 import Roomlist from './Roomlist';
+import {refreshToken} from './Helpers'
+
+
+
+
 class App extends Component {
+  componentDidMount() {
+    setInterval( () => {
+      try{
+        refreshToken()
+      } catch(error) {
+        console.log(error)
+      }
+    },3000*1000)
+  }
+
   render() {
     return (
       <Router>

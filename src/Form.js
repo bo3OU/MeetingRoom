@@ -6,6 +6,8 @@ import './Assets/css/custom.css';
 import queryString from './query-string/index';
 import axios from 'axios';
 import qs from 'qs';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default class  Form extends Component {
     constructor(props) {
@@ -20,8 +22,8 @@ export default class  Form extends Component {
             HoursList : [8,9,10,11,12,13,14,15,16,17,18,19,20],
             MinList : [0,15,30,45],
             currentDate: '',
-
         }
+        this.addevent = this.addevent.bind(this)
     }
 
     componentDidMount() {
@@ -32,7 +34,85 @@ export default class  Form extends Component {
         },1000)
       }
     addevent() {
+      var self = this;
+      
+      if (this.state.Date =='' || this.state.endHour == -1 || this.state.endMin==-1 || this.state.startHour==-1 || this.state.startMin==-1 || this.state.Title =='') {
+        toast.warn('verifiez si un champ est vide ')
+      }
+      else {
+        console.log('addevevnt')
+        var startHour = parseInt(this.state.startHour)
+        var startMin = parseInt(this.state.startMin)
+        var endHour = parseInt(this.state.endHour)
+        var endMin = parseInt(this.state.endMin)
+        if(startHour > endHour || (startHour == endHour && startMin >= endMin)) {
+          toast.warn('verifiez l\'heure de debut et de fin')
+        }
+        else {
+          var datestart = this.state.Date + 'T' + this.state.startHour + ':' + this.state.startMin+':00Z'
+          var dateend= this.state.Date + 'T' + this.state.endHour + ':' + this.state.endMin+':00Z'
+          var url = 'https://www.googleapis.com/calendar/v3/calendars/'+ localStorage.getItem('RoomID') +'/events';
+          //get events that
+          console.log(datestart)
+          console.log(dateend)
+          var url = 'https://www.googleapis.com/calendar/v3/calendars/3itechnology.ma_69l3v7ftj563qq3e8td219t4bs@group.calendar.google.com/events?timeMin=' + datestart+ '&timeMax='+dateend;
+          console.log(localStorage.getItem('token'))
+          axios.get(url,
+          {
+            headers: {
+                'Authorization': 'Bearer '+ localStorage.getItem('token'),
+            }
+          }).then(function(response) {
+            if(response.data.items.length > 0) {
+              toast.warn('la salle sera reserve a ce moment')
+            } else {
+              console.log('else')
+              axios.post(url, 
+                {
+                  "end": {
+                    "dateTime": dateend
+                  },
+                  "start": {
+                    "dateTime": datestart
+                  },
+                  "summary": self.state.Title
+              },{
+                  headers: {
+                      'Authorization': 'Bearer '+ localStorage.getItem('token'),
+                  },
+                  params : {
+                      'calendarId': localStorage.getItem('RoomID')
+                  }
+              }).then(function(response) {
+                console.log('response')
+                if(response.status == 200) { 
+                  toast.success('Evenement ajoute avec succes')
+                }
+              }).catch(function(error) {
+                console.log('something wrong here')
+                toast.error(error.message)
+                self.props.history.push('/login')
+              })
+            }
+          }).catch(function(error){
+            console.log('here')
+            toast.error(error.message)
+            return;
+          })
+          // axios.get('https://www.googleapis.com/calendar/v3/calendars/3itechnology.ma_69l3v7ftj563qq3e8td219t4bs@group.calendar.google.com/events?timeMax=' + dateend).then(function(response) {
+          //   console.log(response.data.items)
+          //   if(response.data.items[response.data.items.length - 1].end.dateTime > datestart ){
+          //     toast.warn('la salle sera reserve a ce moment')
+          //     return;
+          //   }
+          // }).catch(function(error){
+          //   toast.error(error.message)
+          //   return;
+          // })
 
+
+        }
+      }
     }
 
     render() {
@@ -40,6 +120,17 @@ export default class  Form extends Component {
         <div>
 
 	<section id="home">
+        <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnVisibilityChange={false}
+        draggable
+        pauseOnHover={false}
+        />
 		<div className="overlay"></div>
 		<div className="container">
 			<div className="row">
@@ -48,15 +139,15 @@ export default class  Form extends Component {
 						<div className="container">
 
 							<div className="row">
-								<div className="col-md-2"><img src="./images/logo.png" alt="Italian Trulli" style={{'width': '150px','height': '50px'}}/></div>
+								<div className="col-md-2"><img src={require('./Assets/images/logo.png')} alt="Italian Trulli" style={{'width': '150px','height': '50px'}}/></div>
 								<div className="col-md-8"><h1 style={{'fontSize': '2.5em','marginBottom': '0px'}}>{localStorage.getItem('RoomName')}</h1></div>
 								<div className="col-md-1">
-										<button type="button" className="btn btn-default btn-circle btn-xl"><i className="fa fa-plus"></i>
+										<button type="button" className="btn btn-default btn-circle btn-xl" onClick={() => {this.props.history.push('/homepage')}}><i className="fa fa-home"></i>
 										</button>
 
 								</div>
 								<div className="col-md-1">
-										<button type="button" className="btn btn-default btn-circle btn-xl"><i className="fa fa-calendar"></i>
+										<button type="button" className="btn btn-default btn-circle btn-xl" onClick={() => {this.props.history.push('/calendar')}}><i className="fa fa-calendar"></i>
 										</button>
 								</div>
 							</div>

@@ -22,7 +22,7 @@ export default class  Roomlist extends Component {
 
         const parsed = queryString.parse(this.props.location.search);
         localStorage.setItem('code', parsed.code);
-        this.getToken(parsed.code)
+       this.getToken(parsed.code)
         
     }
 
@@ -50,8 +50,14 @@ export default class  Roomlist extends Component {
             // handle success
             console.log(response.data.access_token)
             localStorage.setItem('token',response.data.access_token)
-            localStorage.setItem('refresh',response.data.refresh_token)
+            console.log(response.data.hasOwnProperty('refresh_token'))
+            console.log(response.data)
+            if ( response.data.hasOwnProperty('refresh_token')) {
+                console.log('token exists')
+                localStorage.setItem('refresh',response.data.refresh_token)
+            }
             // getCalendars()
+            // bring from localstorage
             axios.get('https://www.googleapis.com/calendar/v3/users/me/calendarList?oauth_signature_method=HMAC-SHA1&oauth_timestamp=1537581206&oauth_nonce=B1n4Zb&oauth_version=1.0&oauth_signature=B+oorx+CN4QuckPbWY+BppkV7IY=', 
             {
                 headers: {
@@ -87,27 +93,37 @@ export default class  Roomlist extends Component {
     }
 
     render() {
-      return ( 
-        <div className="container">
-            <div className="row">
-                <div className="container">        
-                    <div className="col-sm-6" >
-                        <select 
-                            className="custom-select" 
-                            style={{'textAlignLast':'center'}} 
-                            value={this.state.selectedID}
-                            onChange={(e) => this.setState({selectedID: e.target.value})}
-                        >
-                        <option value="-1" defaultValue>heures</option>
-                        {Object.keys(this.state.calendars).map((item, i) => (
-                                <option value={i} key={i}>{this.state.calendars[item].summary}</option>
-                        ))}
-                        </select>
-                        <button type="button" className="btn btn-primary" onClick={(e) => {this.setRoom()}}>choose room</button>
+        return (
+
+            // <div className="wrapper"   style={{
+            //       'position': 'absolute',
+            //       'left': '40%',
+            //       'top': '40%'
+            //   }}>
+            <div className="container">
+                <div className="row">
+                    <div className="container">
+                    <div className="col-xs-6" style={{'paddingTop' : '40%'}}></div>
+                        <div className="col-xs-3" >
+                            <select
+                                className="custom-select"
+                                style={{'textAlignLast':'center'}}
+                                value={this.state.selectedID}
+                                onChange={(e) => this.setState({selectedID: e.target.value})}
+                            >
+                            <option value="-1" defaultValue>heures</option>
+                            {Object.keys(this.state.calendars).map((item, i) => (
+                                    <option value={i} key={i}>{this.state.calendars[item].summary}</option>
+                            ))}
+                            </select>
+                          <center style={{'marginTop':'30px'}}>
+                            <button type="button" className="btn btn-primary" onClick={(e) => {this.setRoom()}}>choose room</button>
+                            </center>   
+                        </div>
                     </div>
                 </div>
-            </div>
-       </div>
-       )
+           </div>
+        //    </div>
+           )
     }
 }
