@@ -4,7 +4,6 @@ import './Assets/css/vegas.min.css';
 import './Assets/css/font-awesome.min.css';
 import './Assets/css/templatemo-style.css';
 import './Assets/css/custom.css';
-import queryString from './query-string/index';
 import axios from 'axios';
 import qs from 'qs';
 
@@ -20,13 +19,15 @@ export default class  Homepage extends Component {
             TimerValue : '00:00:00',
             TimeTillNextMeeting : 0,
             RoomStatus : -1,
-            color1: '229933',
+            color1: '43b581',
             color2: 'e9e9e9',
             startevent:0,
             endevent:0,
             now:0,
+            buttonvis:0,
         };
         this.getEvents()
+        // this.validate = this.validate.bind(this)
     }
 
     getEvents(){
@@ -38,16 +39,17 @@ export default class  Homepage extends Component {
                 'Authorization': 'Bearer '+ localStorage.getItem('token'),
             }
         }).then(function(response) {
-            console.log(response)
             if(response.data.items.length == 0) {
                 self.setState({RoomStatus : 0, TimerValue:'----',TimerStatement:'Aucune reunion aujourd\'hui'})
             }
             else {
+                
                 var Start = response.data.items[0].start.dateTime;
                 Start = new Date(Start).getTime()
                 var End = response.data.items[0].end.dateTime;
                 End = new Date(End).getTime()
-                // TODO set ID of event
+                localStorage.setItem('eventid',response.data.items[0].id)
+                // TODO set ID of even''t
                 self.setState({startevent:Start,endevent:End})
             }
         })
@@ -69,7 +71,7 @@ export default class  Homepage extends Component {
                     TimerValue:  this.formatTimestamp(Start - now) ,
                     RoomStatus:  0,
                     TimerStatement: 'Prochaine reunion dans :',
-                    color1: '',
+                    color1: '43b581',
                     color2: 'e9e9e9', 
                 })
             } else if( now < Start ) {
@@ -79,16 +81,28 @@ export default class  Homepage extends Component {
                     TimerValue:  this.formatTimestamp(Start - now),
                     RoomStatus: 1,
                     TimerStatement: 'temps restant pour la reunion :',
-                    color1: '',
+                    color1: 'faa61a',
                     color2: 'e9e9e9', 
                 })
             } else if (End > now + 2*60*1000){ // equals ??
                 console.log('happening')
+                if (localStorage.getItem('validate')==0) {
+                    var url = 'https://www.googleapis.com/calendar/v3/calendars/' + localStorage.getItem('RoomID')+ '/events/' + localStorage.getItem('eventid')
+                    axios.delete(url,   
+                        { 
+                            headers: {
+                            'Authorization': 'Bearer '+ localStorage.getItem('token'),
+                        }
+                    }).then(function(response) {
+                        this.getEvents()
+                        localStorage.setItem('validate',0)
+                    })
+                    }
                 self.setState({
                     TimerValue:  this.formatTimestamp(End - now),
                     RoomStatus: 3,
                     TimerStatement: 'temps restant pour la fin de la reunion :',
-                    color1: '',
+                    color1: 'f04747',
                     color2: 'e9e9e9', 
                 })
             } else if (End > now) {
@@ -97,9 +111,12 @@ export default class  Homepage extends Component {
                     TimerValue: this.formatTimestamp(End - now),
                     RoomStatus: 4,
                     TimerStatement: 'temps restant pour la fin de la reunion :',
-                    color1: '',
-                    color2: '', 
+                    color1: 'f04747',
+                    color2: 'e9e9e9', 
                 })
+                if(End < now + 1000){
+                    this.eventEnd()
+                }
             }
           })
           
@@ -110,6 +127,14 @@ export default class  Homepage extends Component {
         },60*1000)
       }
 
+        validate() {
+            console.log('here')
+            localStorage.setItem('validate',1)
+            this.setState({buttonvis :0})
+        }
+        eventEnd() {
+
+        }
       formatTimestamp(timestamp) {
         var date = new Date(timestamp);
         var hours = "0" + date.getHours();
@@ -171,8 +196,9 @@ export default class  Homepage extends Component {
                                         <div className="col-md-6">
                                             <button type="button" className="buttons successes" style={{
                                                 'visibility':this.state.RoomStatus == 1 ? 'visible' : 'hidden'
-
-                                            }}>Confirmer presence de reunion</button>
+                                            }}
+                                                onClick={() => this.validate()}
+                                            >Confirmer presence de reunion</button>
                                         </div>
                                         <div className="col-md-3">
                                         </div>

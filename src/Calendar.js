@@ -29,7 +29,7 @@ export default class  Calendar extends Component {
         <div>
 
 	<section id="home">
-		<div className="overlay"></div>
+		<div className="overlay" style={{'background': 'linear-gradient(to top right, #43b581, #e9e9e9)'}}></div>
 		<div className="container">
 			<div className="row">
 				<div className="col-md-12 col-sm-12">
