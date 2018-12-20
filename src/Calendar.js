@@ -16,20 +16,21 @@ export default class  Calendar extends Component {
     }
 
     componentDidMount() {
-        setInterval( () => {
-          this.setState({
+        setInterval(() => {
+            this.setState({
             currentDate : new Date().toLocaleString()
-          })
+            })
         },1000)
-      }
+    }
 
 
     render() {
-      return (
+        return (
         <div>
 
 	<section id="home">
-		<div className="overlay" style={{'background': 'linear-gradient(to top right, #43b581, #e9e9e9)'}}></div>
+        <div className="overlay" style={{'background': 'linear-gradient(to top right, #43b581, #e9e9e9)'}}>
+        </div>
 		<div className="container">
 			<div className="row">
 				<div className="col-md-12 col-sm-12">
@@ -44,27 +45,22 @@ export default class  Calendar extends Component {
 										</button>
 
 								</div>
-
 								<div className="col-md-1">
 										<button type="button" className="btn btn-default btn-circle btn-xl" onClick={() => {this.props.history.push('/homepage')}} ><i className="fa fa-home"></i>
 										</button>
 								</div>
-
 							</div>
-
 							<div className="row">
 								<div className="col-md-12"><h3 style={{'textAlign': 'center','marginTop': '0px'}}> { this.state.currentDate } </h3></div>
 							</div>
-
 							<div style= {{'padding':'20px','marginTop': '0px'}}>
 								<div className="row">
-                                <div class="container">
-                                <div class="calendar-container">
+                                <div className="container">
+                                <div className="calendar-container">
                                         <div className="h_iframe">
                                             <img className="500pxtio" src="http://placehold.it/16x9"/>
                                             <iframe src={"https://calendar.google.com/calendar/embed?src=" + localStorage.getItem('RoomID') + "&ctz=Africa%2FCasablanca"} style={{'border': '0', 'width':'800px','height':'600px' ,'frameborder':'0' ,'scrolling':'no'}}></iframe>
-                                        </div>
-                                    
+                                        </div>  
                                 </div>
                                 </div>
                                 </div>
@@ -77,7 +73,7 @@ export default class  Calendar extends Component {
     </div>
 </div>
 	</section>
-       </div>
-       )
+    </div>
+    )
     }
 }
