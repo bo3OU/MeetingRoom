@@ -6,7 +6,7 @@ import './Assets/css/templatemo-style.css';
 import './Assets/css/custom.css';
 import axios from 'axios';
 import qs from 'qs';
-import queryString from './query-string/index';
+import queryString from 'query-string';
 
 
 export default class  Roomlist extends Component {
@@ -22,18 +22,18 @@ export default class  Roomlist extends Component {
 
         const parsed = queryString.parse(this.props.location.search);
         localStorage.setItem('code', parsed.code);
-       this.getToken(parsed.code)
+        this.getToken(parsed.code);
         
     }
 
     getCalendars(token) {
         console.log('executing get calendars')
 
-         .catch(function (error) {
-           // handle error
-           console.log('something bad happened')   
-           console.log(error);
-         }) 
+        .catch(function (error) {
+        // handle error
+            console.log('something bad happened')   
+            console.log(error);
+        }) 
     }
 
     getToken(auth_key) {

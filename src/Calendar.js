@@ -3,7 +3,7 @@ import './Assets/css/vegas.min.css';
 import './Assets/css/font-awesome.min.css';
 import './Assets/css/templatemo-style.css';
 import './Assets/css/custom.css';
-import queryString from './query-string/index';
+import queryString from 'query-string';
 import axios from 'axios';
 import qs from 'qs';
 
