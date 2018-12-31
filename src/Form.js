@@ -8,7 +8,7 @@ import axios from 'axios';
 import qs from 'qs';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-
+import {refreshToken} from './Helpers'
 export default class  Form extends Component {
     constructor(props) {
         super(props);
@@ -19,20 +19,22 @@ export default class  Form extends Component {
             endMin:-1,
             Title:'',
             Date:'',
-            HoursList : [8,9,10,11,12,13,14,15,16,17,18,19,20],
-            MinList : [0,15,30,45],
+            HoursList : [8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23],
+            MinList : [0,5,10,15,20,25,30,35,40,45,50,55],
             currentDate: '',
         }
         this.addevent = this.addevent.bind(this)
     }
 
     componentDidMount() {
-        setInterval( () => {
-          this.setState({
-            currentDate : new Date().toLocaleString()
-          })
-        },1000)
-      }
+      refreshToken()
+      setInterval( () => {
+        this.setState({
+          currentDate : new Date().toLocaleString()
+        })
+      },1000)
+    }
+
     addevent() {
       var self = this;
       
@@ -40,7 +42,7 @@ export default class  Form extends Component {
         toast.warn('verifiez si un champ est vide ')
       }
       else {
-        console.log('addevevnt')
+        console.log('addevent')
         var startHour = parseInt(this.state.startHour)
         var startMin = parseInt(this.state.startMin)
         var endHour = parseInt(this.state.endHour)
@@ -49,22 +51,19 @@ export default class  Form extends Component {
           toast.warn('verifiez l\'heure de debut et de fin')
         }
         else {
-          var datestart = this.state.Date + 'T' + this.state.startHour + ':' + this.state.startMin+':00Z'
-          var dateend= this.state.Date + 'T' + this.state.endHour + ':' + this.state.endMin+':00Z'
-          var url = 'https://www.googleapis.com/calendar/v3/calendars/'+ localStorage.getItem('RoomID') +'/events';
-          //get events that
-          console.log(datestart)
-          console.log(dateend)
-          var url = 'https://www.googleapis.com/calendar/v3/calendars/3itechnology.ma_69l3v7ftj563qq3e8td219t4bs@group.calendar.google.com/events?timeMin=' + datestart+ '&timeMax='+dateend;
-          console.log(localStorage.getItem('token'))
+          let datestart = `${this.state.Date}T${this.state.startHour - 1}:${this.state.startMin}:00Z`
+          let  dateend= `${this.state.Date}T${this.state.endHour - 1}:${this.state.endMin}:00Z`
+          dateend = new Date(new Date(dateend).getTime() + 5 *60000).toISOString()
+          var url = `https://www.googleapis.com/calendar/v3/calendars/${localStorage.getItem('RoomID')}/events?timeMin=${datestart}&timeMax=${dateend}`;
           axios.get(url,
           {
             headers: {
                 'Authorization': 'Bearer '+ localStorage.getItem('token'),
             }
           }).then(function(response) {
+            console.log('thats how many events there are' + response.data.items.length)
             if(response.data.items.length > 0) {
-              toast.warn('la salle sera reserve a ce moment')
+              toast.warn('la salle sera reservé a ce moment')
             } else {
               console.log('else')
               axios.post(url, 

@@ -6,11 +6,11 @@ import './Assets/css/templatemo-style.css';
 import './Assets/css/custom.css';
 import axios from 'axios';
 import qs from 'qs';
+import {refreshToken} from './Helpers'
 
 export default class  Homepage extends Component {
     constructor(props) {
         super(props);
-        // we should store the calendar ID, refresh token, token, clientID and other oauth2.0 stuff
         this.state = 
         {
             RoomTitle : localStorage.getItem('RoomName'),
@@ -24,44 +24,60 @@ export default class  Homepage extends Component {
             startevent:0,
             endevent:0,
             now:0,
-            buttonvis:0,
         };
         this.getEvents()
-        // this.validate = this.validate.bind(this)
+        this.validate = this.validate.bind(this)
     }
 
     getEvents(){
         var self = this;
-        var url = 'https://www.googleapis.com/calendar/v3/calendars/3itechnology.ma_69l3v7ftj563qq3e8td219t4bs@group.calendar.google.com/events?timeMin=' + new Date().toISOString() + '&timeMax=' + new Date().toISOString().substring(0,11) + '23:59:59Z';
+        var url = `https://www.googleapis.com/calendar/v3/calendars/${localStorage.getItem('RoomID')}/events?timeMin=${new Date().toISOString()}&timeMax=${new Date().toISOString().substring(0,11)}23:59:59Z&orderBy=startTime&singleEvents=true`;
+        console.log('getting events with url :' + url)
         axios.get(url,
         {
             headers: {
                 'Authorization': 'Bearer '+ localStorage.getItem('token'),
             }
         }).then(function(response) {
+            if(response.status == 401) {
+                console.log('well ?')
+                
+            }
             if(response.data.items.length == 0) {
-                self.setState({RoomStatus : 0, TimerValue:'----',TimerStatement:'Aucune reunion aujourd\'hui'})
+                self.setState({
+                    startevent: null,
+                    endevent : null,
+                    RoomStatus : 0,
+                    TimerValue:'----',
+                    TimerStatement:'Aucune reunion aujourd\'hui',
+                    color1: '43b581',
+                    color2: 'e9e9e9' 
+                })
             }
             else {
-                
                 var Start = response.data.items[0].start.dateTime;
                 Start = new Date(Start).getTime()
                 var End = response.data.items[0].end.dateTime;
                 End = new Date(End).getTime()
                 localStorage.setItem('eventid',response.data.items[0].id)
-                // TODO set ID of even''t
                 self.setState({startevent:Start,endevent:End})
             }
+        }).catch((error) => {
+            console.log('401 status here')
+            refreshToken().then((token)=> {
+                console.log(token)    
+                this.getEvents()
+            });
         })
 }
 
     componentDidMount() {
-        var self = this;
+        let self = this;
         setInterval( () => {
-          this.setState({
+        this.setState({
             CurrentDate : new Date().toLocaleString(),
             now : new Date().getTime()
-          },() => {
+        },() => {
             var Start = this.state.startevent;
             var now = this.state.now;
             var End = this.state.endevent; 
@@ -75,7 +91,6 @@ export default class  Homepage extends Component {
                     color2: 'e9e9e9', 
                 })
             } else if( now < Start ) {
-                //check if button clicked, if not set localstorage('')
                 console.log('about to start ')
                 self.setState({
                     TimerValue:  this.formatTimestamp(Start - now),
@@ -84,9 +99,10 @@ export default class  Homepage extends Component {
                     color1: 'faa61a',
                     color2: 'e9e9e9', 
                 })
-            } else if (End > now + 2*60*1000){ // equals ??
-                console.log('happening')
-                if (localStorage.getItem('validate')==0) {
+            } else if (End > now + 2*60*1000){
+                console.log('waiting phase')
+                if(localStorage.getItem('eventid') != localStorage.getItem('lastValideEvent')) {
+                    console.log('event not valid, deleting')
                     var url = 'https://www.googleapis.com/calendar/v3/calendars/' + localStorage.getItem('RoomID')+ '/events/' + localStorage.getItem('eventid')
                     axios.delete(url,   
                         { 
@@ -94,17 +110,22 @@ export default class  Homepage extends Component {
                             'Authorization': 'Bearer '+ localStorage.getItem('token'),
                         }
                     }).then(function(response) {
-                        this.getEvents()
+                        self.getEvents()
                         localStorage.setItem('validate',0)
                     })
-                    }
-                self.setState({
-                    TimerValue:  this.formatTimestamp(End - now),
-                    RoomStatus: 3,
-                    TimerStatement: 'temps restant pour la fin de la reunion :',
-                    color1: 'f04747',
-                    color2: 'e9e9e9', 
-                })
+                } else { 
+                    console.log('event valid,proceeding')
+                    // if (localStorage.getItem('validate')==0) {
+    
+                    self.setState({
+                        TimerValue:  this.formatTimestamp(End - now),
+                        RoomStatus: 3,
+                        TimerStatement: 'temps restant pour la fin de la reunion :',
+                        color1: 'f04747',
+                        color2: 'e9e9e9', 
+                    })
+                }
+
             } else if (End > now) {
                 console.log('about to finish')
                 self.setState({
@@ -115,36 +136,31 @@ export default class  Homepage extends Component {
                     color2: 'e9e9e9', 
                 })
                 if(End < now + 1000){
-                    this.eventEnd()
+                    self.getEvents();
                 }
             }
-          })
-          
-
+        })
         },1000)
         setInterval( () => {
             self.getEvents();
-        },60*1000)
-      }
+        },20*1000)
+    }
 
-        validate() {
-            console.log('here')
-            localStorage.setItem('validate',1)
-            this.setState({buttonvis :0})
-        }
-        eventEnd() {
-
-        }
-      formatTimestamp(timestamp) {
+    formatTimestamp(timestamp) {
         var date = new Date(timestamp);
         var hours = "0" + date.getHours();
         var minutes = "0" + date.getMinutes();
         var seconds = "0" + date.getSeconds();
         return hours.substr(-2) + ':' + minutes.substr(-2) + ':' + seconds.substr(-2);
-      }
-
+    }
+    validate() {
+        localStorage.setItem('lastValideEvent',localStorage.getItem('eventid'))
+        this.setState({
+            RoomStatus : 2
+        })
+    }
     render() {
-      return ( 
+        return ( 
         <div>
             <section id="home">
                 <div className="overlay" style={{'background': 'linear-gradient(to top right, #'+ this.state.color1 +', #' + this.state.color2 + ')'}}>
@@ -210,7 +226,8 @@ export default class  Homepage extends Component {
                     </div>
                 </div>
             </section>
-       </div>
-       )
+        </div>
+        )
     }
 }
+

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import { Switch, Route } from 'react-router'
 import './App.css';
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Link } from "react-router-dom";
 import Homepage from './Homepage';
 import Login from './Login';
 import Calendar from './Calendar';
@@ -11,28 +11,30 @@ import {refreshToken} from './Helpers'
 
 
 
-
 class App extends Component {
   componentDidMount() {
     setInterval( () => {
       try{
+        console.log('refreshing token now !')
         refreshToken()
       } catch(error) {
         console.log(error)
       }
-    },3000*1000)
+    },10*60*1000)
   }
 
   render() {
     return (
       <Router>
       <div>  
-        <Route exact path="/homepage" component={Homepage} />
-        <Route path="/roomlist" component={Roomlist} />
-        <Route path="/login" component={Login} />
-        <Route path="/calendar" component={Calendar} />
-        <Route path="/form" component={Form} />
-
+        <Switch>
+          <Route exact path="/homepage" component={Homepage} />
+          <Route path="/roomlist" component={Roomlist} />
+          <Route path="/calendar" component={Calendar} />
+          <Route path="/login" component={Login} />
+          <Route path="/form" component={Form} />
+          <Route path="*" component={Homepage} />
+        </Switch>
         {/* <Route path="/topics" component={Topics} /> */}
       </div>
     </Router>
