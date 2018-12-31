@@ -7,7 +7,7 @@ import './Assets/css/custom.css';
 import axios from 'axios';
 import qs from 'qs';
 import queryString from 'query-string';
-
+import obj from './credentials'
 
 export default class  Roomlist extends Component {
     constructor(props) {
@@ -39,10 +39,10 @@ export default class  Roomlist extends Component {
     getToken(auth_key) {
         const data = { 
             'code': auth_key,
-            'client_id' : '113603925707-l0gumcbmfrisq3vtkgi83g5oc1eiiiqv.apps.googleusercontent.com',
+            'client_id' : obj.obj.client_id,
             'grant_type' : 'authorization_code',
-            'client_secret' : 'LYnxZzYfMjNxI8B343lD5tx0',
-            'redirect_uri' : 'http://localhost:3000/roomlist',
+            'client_secret' : obj.obj.client_secret,
+            'redirect_uri' : 'meetingrooms.tk:3000/roomlist',
         };
         var self = this;
         axios.post('/o/oauth2/token', qs.stringify(data))  
