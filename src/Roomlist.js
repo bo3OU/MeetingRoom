@@ -116,14 +116,14 @@ export default class  Roomlist extends Component {
                                     <option value={i} key={i}>{this.state.calendars[item].summary}</option>
                             ))}
                             </select>
-                          <center style={{'marginTop':'30px'}}>
+                        <center style={{'marginTop':'30px'}}>
                             <button type="button" className="btn btn-primary" onClick={(e) => {this.setRoom()}}>choose room</button>
                             </center>   
                         </div>
                     </div>
                 </div>
-           </div>
+        </div>
         //    </div>
-           )
+        )
     }
 }
