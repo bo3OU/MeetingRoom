@@ -11,6 +11,10 @@ import {refreshToken} from './Helpers'
 export default class  Homepage extends Component {
     constructor(props) {
         super(props);
+        if (!localStorage.getItem('token') || !localStorage.getItem('RoomID')) {
+            this.props.history.push('/login');
+        }
+
         this.state = 
         {
             RoomTitle : localStorage.getItem('RoomName'),
