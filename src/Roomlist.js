@@ -42,7 +42,7 @@ export default class  Roomlist extends Component {
             'client_id' : obj.obj.client_id,
             'grant_type' : 'authorization_code',
             'client_secret' : obj.obj.client_secret,
-            'redirect_uri' : 'meetingrooms.tk:3000/roomlist',
+            'redirect_uri' : 'http://meetingrooms.tk:3000/roomlist',
         };
         var self = this;
         axios.post('/o/oauth2/token', qs.stringify(data))  
@@ -64,26 +64,22 @@ export default class  Roomlist extends Component {
                     'Authorization': 'Bearer '+ response.data.access_token,
                 },
             })  
-           .then(function (response) {
-               console.log('something good happened?')
-               console.log(response)
-               console.log(response.data.items[0].summary)
-               self.setState({
-                   calendars : response.data.items
-               })
+            .then(function (response) {
+                console.log('something good happened?')
+                console.log(response)
+                console.log(response.data.items[0].summary)
+                self.setState({
+                    calendars : response.data.items
+                })
 
-             })
-          })
-          .catch(function (error) {
+                })
+            })
+            .catch(function (error) {
             // handle error
+            console.log('why the fuck')
             console.log('something bad happened')   
             console.log(error);
-          })
-          .then(function () {
-            // always executed
-          });
-    
-        // return new key and stores it in memory 
+        })
     } 
 
     setRoom() {
